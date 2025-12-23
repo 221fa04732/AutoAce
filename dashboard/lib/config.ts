@@ -1,3 +1,3 @@
-const BASE_URL='https://try-rho-weld.vercel.app'
+const BASE_URL='https://autoace.vercel.app'
 
 export default BASE_URL;
