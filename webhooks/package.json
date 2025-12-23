@@ -1,0 +1,24 @@
+{
+  "name": "webhooks",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "tsc -b && node dist/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.89.0",
+    "bullmq": "^5.66.1",
+    "crypto": "^1.0.1",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "redis": "^5.10.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6"
+  }
+}
