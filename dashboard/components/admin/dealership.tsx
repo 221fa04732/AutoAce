@@ -53,8 +53,8 @@ export default function Dealership(){
 }
 
 const DealerCard = ({ dealer } : any) => {
-  const { dealership_id, good, bad, needs_review } = dealer;
-  const total = good + bad + needs_review;
+  const { dealership_id, good, bad, needs_review, reviewed } = dealer;
+  const total = good + bad + needs_review + reviewed;
   
   return (
     <div className="bg-zinc-950 rounded-xl shadow-lg px-4 py-3 border border-emerald-950 cursor-pointer hover:bg-zinc-900 hover:translate-x-1 hover:-translate-y-1 hover:border-blue-500 duration-300">
@@ -73,6 +73,8 @@ const DealerCard = ({ dealer } : any) => {
         <div className="col-span-2">{bad}</div>
         <div className="col-span-10">Need Review</div>
         <div className="col-span-2">{needs_review}</div>
+        <div className="col-span-10">Reviewed</div>
+        <div className="col-span-2">{reviewed}</div>
       </div>
     </div>
 )};
