@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import { RotateCw } from "lucide-react"
 import { Loader } from "../loader"
 import Error from "../error"
-import { ChevronDown, ChevronUp, CarFront, Phone,  CheckCircle, AlertTriangle, ArrowUpRight, MessageSquare } from "lucide-react"
+import { ChevronDown, ChevronUp, CarFront, Phone,  CheckCircle, AlertTriangle, ArrowUpRight, MessageSquare, Mail } from "lucide-react"
 import SimpleError from "../simpleError"
 import { SimpleLoader } from "../simpleLoader"
 import CallDetailCard from "../admin/call_detail_card"
@@ -22,6 +22,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import BASE_URL from "@/lib/config"
+import { SmsCommandListInstance } from "twilio/lib/rest/supersim/v1/smsCommand"
 
 export default function Event(){
 
@@ -73,6 +74,7 @@ const DealershipCard = ({ dealer } : any) => {
     const [data, setData] = useState([])
     const [email, setEmail]= useState('')
     const [message, setMessage]= useState('')
+    const [sms, setSms] = useState('')
 
     const fetchCallDetails = async () => {
         setData([])
@@ -121,6 +123,23 @@ const DealershipCard = ({ dealer } : any) => {
             toast('message sent')
             setEmail('')
             setMessage('')
+        }
+        catch(err){
+            toast.error('error while sending message')
+        }
+    }
+
+    const handleSMS = async () => {
+        if(sms===''){
+            toast('Missing Fields')
+            return;
+        }
+        try{
+            await axios.post(`${BASE_URL}/api/cms/send-sms`,{
+                message : sms
+            })
+            toast('sms sent')
+            setSms('')
         }
         catch(err){
             toast.error('error while sending message')
@@ -176,7 +195,7 @@ const DealershipCard = ({ dealer } : any) => {
                     </button>
                     <Dialog>
                         <DialogTrigger asChild>
-                            <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"><MessageSquare size={14} />Chat</button>
+                            <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"><Mail size={14} />Mail</button>
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-[425px]">
                             <div className="grid gap-4">
@@ -196,6 +215,27 @@ const DealershipCard = ({ dealer } : any) => {
                                 <Button onClick={()=>{
                                     handleMessage()
                                 }}>Send mail</Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"><MessageSquare size={14} />SMS</button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                            <div className="grid gap-4">
+                                <div className="grid gap-3">
+                                <Label htmlFor="username-1">Message</Label>
+                                <Textarea placeholder="Type your message here." className="min-h-40" value={sms} onChange={(e)=>{setSms(e.target.value)}}/>
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <DialogClose asChild>
+                                <Button variant="outline">Cancel</Button>
+                                </DialogClose>
+                                <Button onClick={()=>{
+                                    handleSMS()
+                                }}>Send sms</Button>
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
