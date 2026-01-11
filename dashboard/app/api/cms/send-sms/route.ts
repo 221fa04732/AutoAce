@@ -13,7 +13,6 @@ export async function POST(req : NextRequest){
         const accountSid = process.env.TWILIO_ACCOUNT_SID as string;
         const authToken = process.env.TWILIO_AUTH_TOKEN as string;
         const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER as string;
-        const myPhoneNumber = process.env.MY_PHONE_NUMBER as string;
         const client = twilio(accountSid, authToken);
         const smsData = await req.json();
         const supabase =await createClient()
@@ -35,11 +34,11 @@ export async function POST(req : NextRequest){
         const message = await client.messages.create({
             body: smsData.message,
             from: twilioPhoneNumber,
-            to: myPhoneNumber,
+            to: smsData.clientPhoneNumber,
         });
 
         const { error : message_error } = await supabaseAdmin.from('message').insert({
-            phone : myPhoneNumber,
+            phone : smsData.clientPhoneNumber,
             message : smsData.message,
             sender : user_data.user.user_metadata.email
         })

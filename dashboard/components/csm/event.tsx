@@ -22,7 +22,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import BASE_URL from "@/lib/config"
-import { SmsCommandListInstance } from "twilio/lib/rest/supersim/v1/smsCommand"
+import MessageHistory from "./messageHistory"
 
 export default function Event(){
 
@@ -129,14 +129,15 @@ const DealershipCard = ({ dealer } : any) => {
         }
     }
 
-    const handleSMS = async () => {
+    const handleSMS = async (clientPhoneNumber : string) => {
         if(sms===''){
             toast('Missing Fields')
             return;
         }
         try{
             await axios.post(`${BASE_URL}/api/cms/send-sms`,{
-                message : sms
+                message : sms,
+                clientPhoneNumber : clientPhoneNumber
             })
             toast('sms sent')
             setSms('')
@@ -222,20 +223,18 @@ const DealershipCard = ({ dealer } : any) => {
                         <DialogTrigger asChild>
                             <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"><MessageSquare size={14} />SMS</button>
                         </DialogTrigger>
-                        <DialogContent className="sm:max-w-[425px]">
+                        <DialogContent className="sm:max-w-[750px]">
                             <div className="grid gap-4">
                                 <div className="grid gap-3">
-                                <Label htmlFor="username-1">Message</Label>
-                                <Textarea placeholder="Type your message here." className="min-h-40" value={sms} onChange={(e)=>{setSms(e.target.value)}}/>
+                                    <div className="flex justify-start items-center gap-2"> <MessageSquare size={16}/> {item.phone}</div>
+                                    <MessageHistory phoneNumber={item.phone} />
                                 </div>
                             </div>
                             <DialogFooter>
-                                <DialogClose asChild>
-                                <Button variant="outline">Cancel</Button>
-                                </DialogClose>
+                                <Input placeholder="Type your message here." value={sms} onChange={(e)=>{setSms(e.target.value)}}/>
                                 <Button onClick={()=>{
-                                    handleSMS()
-                                }}>Send sms</Button>
+                                    handleSMS(item.phone)
+                                }}>Send</Button>
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
