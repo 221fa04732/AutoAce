@@ -9,7 +9,7 @@ const supabaseAdmin = forAdmin(
 
 export async function POST(req : NextRequest){
     try{
-        const smsRecieveData = await req.json();
+        const smsRecieveData = await req.text();
         // const supabase =await createClient()
 
         // const { data : user_data, error : user_error} = await supabase.auth.getUser();
@@ -22,7 +22,7 @@ export async function POST(req : NextRequest){
 
         const {error : message_error } = await supabaseAdmin.from('sms_message').insert({
             conversationId : '1',
-            message : String(smsRecieveData),
+            message : smsRecieveData,
             sender : 'user',
         })
         if(message_error){throw new Error()}
