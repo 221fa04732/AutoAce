@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { createClient as forAdmin} from '@supabase/supabase-js'
 
 const supabaseAdmin = forAdmin(
@@ -9,32 +8,23 @@ const supabaseAdmin = forAdmin(
 
 export async function POST(req : NextRequest){
     try{
-        const smsRecieveData = await req.text();
-        // const supabase =await createClient()
+        const smsRawData = await req.formData();
+        const smsRecieveData = Object.fromEntries(smsRawData.entries());
 
-        // const { data : user_data, error : user_error} = await supabase.auth.getUser();
-        
-        // if(user_error || !user_data || user_data.user.user_metadata.role != 'user'){
-        //     return NextResponse.json({
-        //         message : 'Unauthorized access'
-        //     },{status : 401})
-        // }
-
-        const {error : message_error } = await supabaseAdmin.from('sms_message').insert({
-            conversationId : '1',
-            message : smsRecieveData,
-            sender : 'user',
+        const {error : message_error } = await supabaseAdmin.from('message').insert({
+            phone : smsRecieveData.From,
+            message : smsRecieveData.Body,
+            sender : 'client',
         })
         if(message_error){throw new Error()}
         
         return NextResponse.json({ 
             success: true, 
-            message: "sms send successfully!" 
-        });
+            message: "sms recieve successfully!" 
+        }, { status : 200 });
     }
     catch(err){
         return NextResponse.json({
-            err,
             message : 'Server error'
         },{ status : 500})
     }
