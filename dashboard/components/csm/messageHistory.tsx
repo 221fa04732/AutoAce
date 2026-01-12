@@ -7,6 +7,9 @@ import BASE_URL from "@/lib/config"
 import axios from "axios"
 import { Users } from "lucide-react"
 import { format } from "date-fns"
+import { ArrowUpToLine, ArrowDownToLine, RotateCcw } from "lucide-react"
+import { Button } from "../ui/button"
+import { toast } from "sonner"
 
 interface Message {
   id: string
@@ -21,6 +24,43 @@ export default function MessageHistory({ phoneNumber }: { phoneNumber: string })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
+  const [recommendationData, setRecommendationData] = useState([])
+  const [recommendationLoader, setRecommendationLoader] = useState(false)
+
+  const fetchRecommendationData = async () => {
+    try {
+      setRecommendationLoader(true)
+      const res = await axios.post(`${BASE_URL}/api/cms/recommended-sms`,{
+        sms_data : messageData
+      })
+      setRecommendationData(res.data.recommended_action)
+    } 
+    catch (err) {
+      toast.error('Server Error, Please try again!')
+    } 
+    finally {
+      setRecommendationLoader(false)
+    }
+  }
+
+  const handleSendSMS = async (message : string) => {
+    setRecommendationData([])
+    if(message===''){
+        toast('Missing Fields')
+        return;
+    }
+    try{
+        await axios.post(`${BASE_URL}/api/cms/send-sms`,{
+            message : message,
+            clientPhoneNumber : phoneNumber
+        })
+        toast('sms sent')
+    }
+    catch(err){
+        toast.error('error while sending message')
+    }
+  }
+
   const fetchSmsData = async () => {
     try {
       const res = await axios.get(`${BASE_URL}/api/cms/sms/${phoneNumber}`)
@@ -30,6 +70,7 @@ export default function MessageHistory({ phoneNumber }: { phoneNumber: string })
         const newLastId = newMessages[newMessages.length - 1]?.id
         return prevLastId === newLastId ? prev : newMessages
       })
+      setError(false)
     } 
     catch (err) {
       setError(true)
@@ -52,20 +93,29 @@ export default function MessageHistory({ phoneNumber }: { phoneNumber: string })
 const containerRef = useRef<HTMLDivElement | null>(null)
 
 useEffect(() => {
+  scrollBottom()
+}, [messageData, recommendationData])
+
+const scrollTop = ()=>{
   if(containerRef && containerRef.current)
-    containerRef.current.scrollTop = containerRef.current?.scrollHeight
-}, [messageData])
+  containerRef.current.scrollTop = 0
+}
 
-  const formatDate = (dateString: string) => {
-      const date = new Date(dateString)
-      return format(date, 'MMM d, yyyy h:mm a')
-  }
+const scrollBottom = () =>{
+  if(containerRef && containerRef.current)
+  containerRef.current.scrollTop = containerRef.current?.scrollHeight
+}
 
-  if (loading) { return (<SimpleLoader />)}
-  if (error) {return (<SimpleError />)}
+const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return format(date, 'MMM d, yyyy h:mm a')
+}
+
+if (loading) { return (<SimpleLoader />)}
+if (error) { return (<SimpleError />)}
 
   return (<div className="relative">
-      <div id="message-container" ref={containerRef} className="h-64 overflow-y-auto bg-slate-900 p-4 space-y-4 scroll-smooth">
+      <div id="message-container" ref={containerRef} className="h-96 overflow-y-auto bg-slate-900 p-4 space-y-4 scroll-smooth rounded-md">
         {messageData.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-400">
             <p className="text-lg font-medium text-gray-300">No messages yet</p>
@@ -86,6 +136,23 @@ useEffect(() => {
                     </span>
                 </div>)
             }))}
+            {recommendationData.length > 0 && (
+              <div className="flex flex-wrap justify-end gap-2 mt-3">
+                {recommendationData.map((item: string, index: number) => (
+                  <button onClick={()=>{
+                    handleSendSMS(item)
+                  }} key={index} className="px-3 py-1.5 text-sm rounded-full border border-dashed border-gray-400 text-gray-700 bg-white hover:border-gray-600 hover:bg-blue-100 transition">{item}</button>
+                ))}
+              </div>
+            )}
+        </div>
+        <div className="flex justify-end gap-2 mt-4">
+          <Button onClick={()=>{
+            if(!recommendationLoader){fetchRecommendationData()}
+            }}>{recommendationLoader ? "Please Wait" : "AI Recommendation"}</Button>
+          <Button onClick={()=>{scrollTop()}}><ArrowUpToLine size={18} /></Button>
+          <Button onClick={()=>{scrollBottom()}}><ArrowDownToLine size={18} /></Button>
+          <Button onClick={()=>{fetchSmsData()}}><RotateCcw size={18} /></Button>
         </div>
     </div>
 )}

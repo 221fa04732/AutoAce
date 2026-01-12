@@ -231,7 +231,7 @@ const DealershipCard = ({ dealer } : any) => {
                                 </div>
                             </div>
                             <DialogFooter>
-                                <Input placeholder="Type your message here." value={sms} onChange={(e)=>{setSms(e.target.value)}}/>
+                                <Input className="bg-slate-900" placeholder="Type your message here." value={sms} onChange={(e)=>{setSms(e.target.value)}}/>
                                 <Button onClick={()=>{
                                     handleSMS(item.phone)
                                 }}>Send</Button>
