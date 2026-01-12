@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { SimpleLoader } from "../simpleLoader"
 import SimpleError from "../simpleError"
 import BASE_URL from "@/lib/config"
@@ -22,11 +22,14 @@ export default function MessageHistory({ phoneNumber }: { phoneNumber: string })
   const [error, setError] = useState(false)
 
   const fetchSmsData = async () => {
-    setLoading(true)
-    setError(false)
     try {
       const res = await axios.get(`${BASE_URL}/api/cms/sms/${phoneNumber}`)
-      setMessageData(res.data.sms_data)
+      const newMessages = res.data.sms_data
+      setMessageData(prev =>{
+        const prevLastId = prev[prev.length - 1]?.id
+        const newLastId = newMessages[newMessages.length - 1]?.id
+        return prevLastId === newLastId ? prev : newMessages
+      })
     } 
     catch (err) {
       setError(true)
@@ -37,8 +40,21 @@ export default function MessageHistory({ phoneNumber }: { phoneNumber: string })
   }
 
   useEffect(() => {
-    fetchSmsData()
+    fetchSmsData() 
+    const timeInterval = setInterval(()=>{
+      fetchSmsData()
+    },3000)
+
+    return () => clearInterval(timeInterval)
+
   }, [phoneNumber])
+
+const containerRef = useRef<HTMLDivElement | null>(null)
+
+useEffect(() => {
+  if(containerRef && containerRef.current)
+    containerRef.current.scrollTop = containerRef.current?.scrollHeight
+}, [messageData])
 
   const formatDate = (dateString: string) => {
       const date = new Date(dateString)
@@ -49,7 +65,7 @@ export default function MessageHistory({ phoneNumber }: { phoneNumber: string })
   if (error) {return (<SimpleError />)}
 
   return (<div className="relative">
-      <div className="h-64 overflow-y-auto bg-slate-900 p-4 space-y-4 scroll-smooth">
+      <div id="message-container" ref={containerRef} className="h-64 overflow-y-auto bg-slate-900 p-4 space-y-4 scroll-smooth">
         {messageData.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-400">
             <p className="text-lg font-medium text-gray-300">No messages yet</p>
