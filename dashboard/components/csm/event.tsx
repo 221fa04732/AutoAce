@@ -22,7 +22,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import BASE_URL from "@/lib/config"
-import MessageHistory from "./messageHistory"
+import Message from "./message"
 
 export default function Event(){
 
@@ -227,7 +227,7 @@ const DealershipCard = ({ dealer } : any) => {
                             <div className="grid gap-4">
                                 <div className="grid gap-3">
                                     <div className="flex justify-start items-center gap-2"> <MessageSquare size={16}/> {item.phone}</div>
-                                    <MessageHistory phoneNumber={item.phone} />
+                                    <Message phoneNumber={item.phone} />
                                 </div>
                             </div>
                             <DialogFooter>
